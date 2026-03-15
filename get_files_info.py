@@ -10,6 +10,10 @@ def get_files_info(working_directory, directory="."):
         valid_target_dir = os.path.commonpath([working_dir_path, target_dir]) == working_dir_path
         if not valid_target_dir:
             return f"Error: cannot list \"{directory}\" as it is outside the permitted working directory"
-        
+        ls = ""
+        for dir in os.listdir(target_dir):
+            print(dir)
+
+
     except Exception as e:
         return e
