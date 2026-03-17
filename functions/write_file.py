@@ -2,9 +2,9 @@ import os
 from functions.path_validation import validate_path_lite
 from google.genai import types
 
-def write_file(working_dir, directory, content):
+def write_file(working_directory, directory, content):
     try:
-        working_path, target = validate_path_lite(working_dir, directory)
+        working_path, target = validate_path_lite(working_directory, directory)
 
         if os.path.isdir(target):
             return f"Error: {target} is a directory and cant be written to"

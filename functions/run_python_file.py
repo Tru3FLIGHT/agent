@@ -3,9 +3,9 @@ import subprocess
 from functions.path_validation import validate_path
 from google.genai import types
 
-def run_python_file(working_dir, directory, args=None):
+def run_python_file(working_directory, directory, args=None):
     try:
-        wdp, target = validate_path(working_dir, directory)
+        wdp, target = validate_path(working_directory, directory)
 
         if not target.endswith(".py"):
             return f"Error: \"{directory}\" is not a Python file"
@@ -34,7 +34,7 @@ schema_run_python_file = types.FunctionDeclaration(
         parameters=types.Schema(
             type=types.Type.OBJECT,
             properties={
-                "file": types.Schema(
+                "directory": types.Schema(
                     type=types.Type.STRING,
                     description="File path of the python file to execute"
                     ),
@@ -46,6 +46,6 @@ schema_run_python_file = types.FunctionDeclaration(
                     description="A List of Strings for file arguments"
                     ),
                 },
-            required=["file"]
+            required=["directory"]
             ),
         )

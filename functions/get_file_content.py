@@ -4,9 +4,9 @@ from google.genai import types
 
 MAX_CHARS = 10000
 
-def get_file_content(working_dir, directory='.'):
+def get_file_content(working_directory, directory='.'):
     try:
-        working_dir_path, target_dir = validate_path(working_dir, directory)
+        working_dir_path, target_dir = validate_path(working_directory, directory)
         
         if not os.path.isfile(target_dir):
             return f"Error: {target_dir} is not a file... is_file={os.path.isfile(target_dir)} is_dir={os.path.isdir(target_dir)}"
@@ -25,11 +25,11 @@ schema_get_file_content = types.FunctionDeclaration(
         parameters=types.Schema(
             type=types.Type.OBJECT,
         properties={
-            "file": types.Schema(
+            "directory": types.Schema(
                 type=types.Type.STRING,
                 description="File path of the file to be read, relative to the working directory",
                 ),
             },
-        required=["file"]
+        required=["directory"]
         ),
 )

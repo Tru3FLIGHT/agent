@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import argparse
 from prompts import *
 from call_function import available_functions
+from call_function import call_function
 
 
 MODEL = "gemini-2.5-flash"
@@ -43,9 +44,22 @@ Prompt tokens: {response.usage_metadata.prompt_token_count}\n\
 Response tokens: {response.usage_metadata.candidates_token_count}\n\
 =====\n")
 
+    result_list = []
     if response.function_calls:
         for call in response.function_calls:
-            print(f"Calling Function: {call.name}({call.args})\n")
+            call_result = call_function(call, args.verbose)
+            if call_result.parts:
+                func_response = call_result.parts[0].function_response
+                if not func_response:
+                    raise Exception("function response cannot be NoneType")
+                fr_response = func_response.response
+                if not fr_response:
+                    raise Exception("Response property of function_response cannot be NoneType")
+                result_list.append(call_result.parts[0])
+                if args.verbose:
+                    print(f"-> {fr_response}")
+            else:
+                raise Exception(f"CRITICAL ERROR: {call_result} has empty parts list")
     else:
         print(response.text)
     
