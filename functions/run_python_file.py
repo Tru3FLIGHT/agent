@@ -27,22 +27,25 @@ def run_python_file(working_dir, directory, args=None):
         return output
     except Exception as e:
         return f"Error: executing python file: {e}"
-'''
+
 schema_run_python_file = types.FunctionDeclaration(
-name="run_python_file",
-description="runs the specified python file, including any specified paramater",
-parameters=types.Schema(
-    type=types.Type.OBJECT,
-    properties={
-        "directory": types.Schema(
-            type=types.Type.STRING,
-            description="filepath to the python file, relative to working directory",
-        ),
-    },
-    type=types.Type.OBJECT,
-    properties={
-        "Args"
-        }
-),
-)
-'''
+        name="run_python_file",
+        description="Runs a specified python file reletive to the working directory",
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
+            properties={
+                "file": types.Schema(
+                    type=types.Type.STRING,
+                    description="File path of the python file to execute"
+                    ),
+                "args": types.Schema(
+                    type=types.Type.ARRAY,
+                    items=types.Schema(
+                        type=types.Type.STRING,
+                        ),
+                    description="A List of Strings for file arguments"
+                    ),
+                },
+            required=["file"]
+            ),
+        )
