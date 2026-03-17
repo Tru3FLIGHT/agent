@@ -22,7 +22,7 @@ def call_function(func_call, verbose=False):
     if verbose:
         print(f"Calling function: {func_call.name}({func_call.args})")
     else:
-        print(f" - Calling Function: {func_call.name}")
+        print(f" - Calling Function: {func_call.name}\n")
     
     function_name = func_call.name or ""
 
@@ -39,7 +39,7 @@ def call_function(func_call, verbose=False):
 
     args = dict(func_call.args) if func_call.args else {}
 
-    args["working_directory"] = "./calculator"
+    args["working_directory"] = "/home/zalea/.config/nvim"
 
     function_result = function_map[function_name](**args)
 

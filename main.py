@@ -36,6 +36,7 @@ def main():
                 contents=messages,
                 config=types.GenerateContentConfig(
                     tools=[available_functions],system_instruction=system_prompt))
+
         
 
         if response.usage_metadata == None:
@@ -56,6 +57,8 @@ Response tokens: {response.usage_metadata.candidates_token_count}\n
                   """)
 
         result_list = []
+        #find function calls
+        #if any function calls are detected, call_function, root dir declaired in call_function.py
         if response.function_calls:
             for call in response.function_calls:
                 call_result = call_function(call, args.verbose)
