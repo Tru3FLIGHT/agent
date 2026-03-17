@@ -25,43 +25,61 @@ def main():
         raise RuntimeError("api key not found")
     client = genai.Client(api_key=api_key)
     
-    messages = [types.Content(role="user", parts=[types.Part(text=args.user_prompt)])]
+    messages = []
+    messages.append(types.Content(role="user", parts=[types.Part(text=args.user_prompt)]))
 
-                                                                   #gen response
-    response = client.models.generate_content(
-            model=MODEL,
-            contents=messages,
-            config=types.GenerateContentConfig(
-                tools=[available_functions],system_instruction=system_prompt))
+    for _ in range(20):
+
+                                                                       #gen response
+        response = client.models.generate_content(
+                model=MODEL,
+                contents=messages,
+                config=types.GenerateContentConfig(
+                    tools=[available_functions],system_instruction=system_prompt))
+        
+
+        if response.usage_metadata == None:
+            raise RuntimeError("Possible api error - no usage metadata")
+        
+        if not response.candidates:
+            raise RuntimeError("No candidates in iteration {_}")
+        for candidate in response.candidates:
+            messages.append(candidate.content)
+
+        if args.verbose:
+            print(f"""
+Iteration: {_}\n
+User prompt: {args.user_prompt}\n
+Prompt tokens: {response.usage_metadata.prompt_token_count}\n
+Response tokens: {response.usage_metadata.candidates_token_count}\n
+=====\n
+                  """)
+
+        result_list = []
+        if response.function_calls:
+            for call in response.function_calls:
+                call_result = call_function(call, args.verbose)
+                if call_result.parts:
+                    func_response = call_result.parts[0].function_response
+                    if not func_response:
+                        raise Exception("function response cannot be NoneType")
+                    fr_response = func_response.response
+                    if not fr_response:
+                        raise Exception("Response property of function_response cannot be NoneType")
+                    result_list.append(call_result.parts[0])
+                    if args.verbose:
+                        print(f"-> {fr_response}")
+                else:
+                    raise Exception(f"CRITICAL ERROR: {call_result} has empty parts list")
+        else:
+            print(response.text)
+            break
+        
+        messages.append(types.Content(role="user", parts=result_list))
+        if _ == 20:
+            raise Exception("No Response after 20 iterations")
+
     
-    if response.usage_metadata == None:
-        raise RuntimeError("Possible api error - no usage metadata")
-
-    if args.verbose:
-        print(f"\
-User prompt: {args.user_prompt}\n\
-Prompt tokens: {response.usage_metadata.prompt_token_count}\n\
-Response tokens: {response.usage_metadata.candidates_token_count}\n\
-=====\n")
-
-    result_list = []
-    if response.function_calls:
-        for call in response.function_calls:
-            call_result = call_function(call, args.verbose)
-            if call_result.parts:
-                func_response = call_result.parts[0].function_response
-                if not func_response:
-                    raise Exception("function response cannot be NoneType")
-                fr_response = func_response.response
-                if not fr_response:
-                    raise Exception("Response property of function_response cannot be NoneType")
-                result_list.append(call_result.parts[0])
-                if args.verbose:
-                    print(f"-> {fr_response}")
-            else:
-                raise Exception(f"CRITICAL ERROR: {call_result} has empty parts list")
-    else:
-        print(response.text)
     
 
 if __name__ == "__main__":
