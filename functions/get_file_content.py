@@ -1,5 +1,6 @@
 import os
 from functions.path_validation import validate_path
+from google.genai import types
 
 MAX_CHARS = 10000
 
@@ -17,3 +18,16 @@ def get_file_content(working_dir, directory='.'):
 
     except Exception as e:
         return e
+
+schema_get_file_content = types.FunctionDeclaration(
+        name="get_file_content",
+        description="Reads a specified file relative to the working directory, providing the contents",
+        parameters=types.Type.OBJECT,
+        properties={
+            "file": types.Schema(
+                type=types.Type.STRING,
+                description="File path of the file to be read, relative to the working directory",
+                ),
+            },
+        ),
+)

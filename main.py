@@ -31,7 +31,7 @@ def main():
             model=MODEL,
             contents=messages,
             config=types.GenerateContentConfig(
-                tools=[system_instruction=system_prompt))
+                tools=[available_functions],system_instruction=system_prompt))
     
     if response.usage_metadata == None:
         raise RuntimeError("Possible api error - no usage metadata")
