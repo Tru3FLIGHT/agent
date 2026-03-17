@@ -7,7 +7,7 @@ def run_python_file(working_dir, directory, args=None):
         wdp, target = validate_path(working_dir, directory)
 
         if not target.endswith(".py"):
-            return f"Error: {target} is not a python file"
+            return f"Error: \"{directory}\" is not a Python file"
         command = ["python", target]
         
         if args != None:
