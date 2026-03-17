@@ -43,8 +43,11 @@ Prompt tokens: {response.usage_metadata.prompt_token_count}\n\
 Response tokens: {response.usage_metadata.candidates_token_count}\n\
 =====\n")
 
-    print(f"{response.text}")
-
+    if response.function_calls:
+        for call in response.function_calls:
+            print(f"Calling Function: {call.name}({call.args})\n")
+    else:
+        print(response.text)
     
 
 if __name__ == "__main__":

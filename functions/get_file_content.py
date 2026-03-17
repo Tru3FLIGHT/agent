@@ -22,7 +22,8 @@ def get_file_content(working_dir, directory='.'):
 schema_get_file_content = types.FunctionDeclaration(
         name="get_file_content",
         description="Reads a specified file relative to the working directory, providing the contents",
-        parameters=types.Type.OBJECT,
+        parameters=types.Schema(
+            type=types.Type.OBJECT,
         properties={
             "file": types.Schema(
                 type=types.Type.STRING,
