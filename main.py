@@ -4,6 +4,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import argparse
 from prompts import *
+from call_function import available_functions
 
 
 MODEL = "gemini-2.5-flash"
@@ -30,7 +31,7 @@ def main():
             model=MODEL,
             contents=messages,
             config=types.GenerateContentConfig(
-                system_instruction=system_prompt))
+                tools=[system_instruction=system_prompt))
     
     if response.usage_metadata == None:
         raise RuntimeError("Possible api error - no usage metadata")
