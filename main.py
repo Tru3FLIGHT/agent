@@ -1,89 +1,43 @@
 import os
 from google import genai
-from google.genai import types
 from dotenv import load_dotenv
 import argparse
-from prompts import *
-from call_function import available_functions
-from call_function import call_function
 
-
-MODEL = "gemini-2.5-flash"
+import chatbot_core
+import conversation_manager
 
 def main():
-    
+
     #parsing input.....
     parser = argparse.ArgumentParser(description="Chatbot")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
-    parser.add_argument("user_prompt", type=str, help="User prompt")
+    parser.add_argument("-n", "--new-conversation", action="store_true", help="Start a new conversation, ignoring previous history")
+    parser.add_argument("--root-directory", type=str, default=None, help="Specify an alternative root directory for file operations.") # <--- ADDED THIS LINE
     args = parser.parse_args()
-    
+
     #loading env and api key
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     if api_key is None:
         raise RuntimeError("api key not found")
     client = genai.Client(api_key=api_key)
-    
+
     messages = []
-    messages.append(types.Content(role="user", parts=[types.Part(text=args.user_prompt)]))
 
-    for _ in range(20):
+    # Load conversation history or start new, based on argument
+    if args.new_conversation:
+        print("Starting a new conversation as requested.")
+    else:
+        messages = conversation_manager.load_conversation_history()
 
-                                                                       #gen response
-        response = client.models.generate_content(
-                model=MODEL,
-                contents=messages,
-                config=types.GenerateContentConfig(
-                    tools=[available_functions],system_instruction=system_prompt))
+    print("Agent started. Type 'exit' to end the conversation.")
 
-        
+    # Call the chatbot_core function to handle the main interaction
+    chatbot_core.run_chatbot_session(client, messages, args.verbose, args.root_directory) # <--- MODIFIED THIS LINE
 
-        if response.usage_metadata == None:
-            raise RuntimeError("Possible api error - no usage metadata")
-        
-        if not response.candidates:
-            raise RuntimeError("No candidates in iteration {_}")
-        for candidate in response.candidates:
-            messages.append(candidate.content)
+    # Save conversation history before exiting
+    conversation_manager.save_conversation_history(messages)
 
-        if args.verbose:
-            print(f"""
-Iteration: {_}\n
-User prompt: {args.user_prompt}\n
-Prompt tokens: {response.usage_metadata.prompt_token_count}\n
-Response tokens: {response.usage_metadata.candidates_token_count}\n
-=====\n
-                  """)
-
-        result_list = []
-        #find function calls
-        #if any function calls are detected, call_function, root dir declaired in call_function.py
-        if response.function_calls:
-            for call in response.function_calls:
-                call_result = call_function(call, args.verbose)
-                if call_result.parts:
-                    func_response = call_result.parts[0].function_response
-                    if not func_response:
-                        raise Exception("function response cannot be NoneType")
-                    fr_response = func_response.response
-                    if not fr_response:
-                        raise Exception("Response property of function_response cannot be NoneType")
-                    result_list.append(call_result.parts[0])
-                    if args.verbose:
-                        print(f"-> {fr_response}")
-                else:
-                    raise Exception(f"CRITICAL ERROR: {call_result} has empty parts list")
-        else:
-            print(response.text)
-            break
-        
-        messages.append(types.Content(role="user", parts=result_list))
-        if _ == 20:
-            raise Exception("No Response after 20 iterations")
-
-    
-    
 
 if __name__ == "__main__":
     try:

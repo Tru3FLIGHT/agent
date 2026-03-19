@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# Conversation history
+conversation_history.json
+
+tep
