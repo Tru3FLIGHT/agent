@@ -7,6 +7,7 @@ from functions.get_files_info import get_files_info
 from functions.run_python_file import run_python_file
 from functions.write_file import write_file
 from google.genai import types
+import os
 
 available_functions = types.Tool(
         function_declarations=[gfi.schema_get_files_info, ctn.schema_get_file_content, wf.schema_write_file],)
@@ -43,7 +44,7 @@ def call_function(func_call, verbose=False, root_directory=None): # <--- MODIFIE
     if root_directory: # <--- ADDED THIS BLOCK
         args["working_directory"] = root_directory
     else:
-        args["working_directory"] = "/home/zalea/Documents/Projects/bootdev/assignments/agent"
+        args["working_directory"] = os.getcwd()
 
     try:
         function_result = function_map[function_name](**args)
