@@ -3,7 +3,13 @@ import os
 from dotenv import load_dotenv
 from discord.ext import commands
 
+from functions.get_files_info import get_files_info
+from functions.path_validation import validate_path
+
 load_dotenv()
+
+cwd = None
+scope_limiter = "/home/zalea/Documents/"
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -54,6 +60,20 @@ async def delete_text_channel_command(interaction: discord.Interaction, channel_
     else:
         await interaction.response.send_message("This command can only be used in a server.", ephemeral=True)
 
+
+@bot.tree.command(name="cwd", description="changes the cwd on host machine")
+@discord.app_commands.describe(path="The path to the working dir on host machine")
+async def cwd_f(interation: discord.Interaction, path:str):
+    try:
+        validate_path(scope_limiter, path) 
+    except Exception as e:
+        await interation.response.send_message(f"{e}", ephemeral=True)
+    cwd = path
+    print(f"path = {cwd}")
+    await interation.response.send_message(f"Current woring directory changed to `{path}`", ephemeral=True)
+
+
+            
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 
